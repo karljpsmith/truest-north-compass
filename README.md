@@ -1,2 +1,5 @@
 # truest-north-compass
-Public repo for various Truest North Compass assets
+This is the public repo for Truest North Compass. 
+
+This repo contains code for reprogramming the compass using a browser
+   
