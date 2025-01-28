@@ -53,7 +53,6 @@ The interface converts geographic coordinates into binary data and transmits thi
 - Converts coordinates to 53-bit binary strings for transmission
 - Supports both single and multi-destination programming
 - Implements precise timing for flash patterns
-- Mobile-responsive design
 
 ## Setup
 
@@ -71,6 +70,7 @@ The interface converts geographic coordinates into binary data and transmits thi
 ## Best Practices
 
 - Ensure your screen brightness is at maximum
+- Your compass must be upside down to be reprogrammed
 - Clean both your phone screen and compass sensor
 - Keep the compass steady during programming
 - Use in a well-lit environment for best results
