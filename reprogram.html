@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Compass Programming Interface</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* Base layout styles */
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
+            background-color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            text-align: center;
+            width: 90%;
+            max-width: 600px;
+            margin: 10px;
+            padding: 20px;
+        }
+
+        /* Form element styles */
+        input, textarea {
+            font-size: 16px;
+            width: 100%;
+            margin: 5px 0;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Sequence input specific styles */
+        #sequence-input {
+            width: 100%;
+            height: 150px;
+            margin: 10px 0;
+        }
+
+        /* How-to modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+
+        .modal-content ol {
+            text-align: left;
+        }
+
+        .close-modal {
+            background-color: #dc3545;
+            color: white;
+            padding: 10px;
+            margin-top: 20px;
+        }
+
+        /* Desktop optimization */
+        @media only screen and (min-width: 769px) {
+            input, button {
+                width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Instructions button and modal -->
+    <button id="how-to-button">First time here? Click for instructions</button>
+
+    <div id="how-to-modal" class="modal">
+        <div class="modal-content">
+            <h3>How to Use the Compass Programmer</h3>
+            <p>Follow these steps to program your compass:</p>
+            <ol>
+                <li>Enter the target coordinates (latitude and longitude) for your compass.</li>
+                <li>Click "Start Programming" when ready.</li>
+                <li>A 3-second countdown will begin. Before it ends, place your compass face-down on your phone's screen.</li>
+                <li>Your compass will read the sequence of white and black flashes using its light sensor.</li>
+                <li>If successful, both compass hands will spin to confirm programming.</li>
+            </ol>
+            <button class="close-modal" id="close-modal">Close</button>
+        </div>
+    </div>
+
+    <!-- Main coordinate input interface -->
+    <div class="container" id="main-content">
+        <h3>Enter Compass Destination:</h3>
+        <input type="number" id="latitude_input" placeholder="Latitude" step="any">
+        <input type="number" id="longitude_input" placeholder="Longitude" step="any">
+        
+        <div id="coordinates_display">
+            <p>Current coordinates:</p>
+            <p>Latitude: <span id="latitude_display">?</span></p>
+            <p>Longitude: <span id="longitude_display">?</span></p>
+        </div>
+    </div>
+
+    <!-- Sequence programming option -->
+    <div class="container">
+        <button id="do_sequence">Program multiple destinations instead</button>
+        
+        <div id="sequence_input_container" class="hidden">
+            <h3>Enter up to 10 coordinate pairs:</h3>
+            <textarea id="sequence-input" placeholder="Enter lat,lon pairs (one per line):&#10;42.41413,-71.00782&#10;33.61546,-81.10347">42.41413,-71.00782
+33.61546,-81.10347
+40.02296,-75.94243</textarea>
+            
+            <input type="checkbox" id="reset-compass">
+            <label for="reset-compass">Reset to first destination when compass is turned off</label>
+        </div>
+    </div>
+
+    <!-- Programming controls -->
+    <div class="container" id="flash-button">
+        <button id="start-flashing" onclick="startFlashing()">Start Programming</button>
+        <button id="stop-flashing" class="hidden" onclick="stopFlashing()">Stop Programming</button>
+    </div>
+
+    <!-- NoSleep.js prevents screen from turning off during programming -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/nosleep/0.12.0/NoSleep.min.js"></script>
+
+    <script>
+        // Global variables
+        let flashTimeouts = [];
+        let isFlashing = false;
+        let noSleep = new NoSleep();
+        let globalLatitude = 36.44806;
+        let globalLongitude = -105.00806;
+
+        // Initialize the interface
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set up modal functionality
+            const howToButton = document.getElementById('how-to-button');
+            const howToModal = document.getElementById('how-to-modal');
+            const closeModal = document.getElementById('close-modal');
+
+            howToButton.addEventListener('click', () => howToModal.style.display = 'flex');
+            closeModal.addEventListener('click', () => howToModal.style.display = 'none');
+
+            // Initialize coordinate display
+            updateCoordinates(globalLatitude, globalLongitude);
+
+            // Set up sequence button toggle
+            document.getElementById('do_sequence').addEventListener('click', function() {
+                const sequenceContainer = document.getElementById('sequence_input_container');
+                const mainContent = document.getElementById('main-content');
+                
+                if (sequenceContainer.classList.contains('hidden')) {
+                    sequenceContainer.classList.remove('hidden');
+                    mainContent.classList.add('hidden');
+                    this.textContent = 'Program single destination instead';
+                } else {
+                    sequenceContainer.classList.add('hidden');
+                    mainContent.classList.remove('hidden');
+                    this.textContent = 'Program multiple destinations instead';
+                }
+            });
+
+            // Handle coordinate input
+            document.getElementById('latitude_input').addEventListener('change', updateFromInput);
+            document.getElementById('longitude_input').addEventListener('change', updateFromInput);
+        });
+
+        // Update coordinate display
+        function updateCoordinates(lat, lon) {
+            globalLatitude = lat;
+            globalLongitude = lon;
+            document.getElementById('latitude_display').textContent = lat.toFixed(5);
+            document.getElementById('longitude_display').textContent = lon.toFixed(5);
+        }
+
+        // Handle manual coordinate input
+        function updateFromInput() {
+            const lat = parseFloat(document.getElementById('latitude_input').value);
+            const lon = parseFloat(document.getElementById('longitude_input').value);
+            if (!isNaN(lat) && !isNaN(lon)) {
+                updateCoordinates(lat, lon);
+            }
+        }
+
+        // Convert latitude and longitude to binary string
+        function latLonTo53BitString(latitude, longitude) {
+            let latInt = Math.abs(Math.round(latitude * 100000));
+            let lonInt = Math.abs(Math.round(longitude * 100000));
+
+            let latSign = latitude < 0 ? 1 : 0;
+            let lonSign = longitude < 0 ? 1 : 0;
+
+            let latBinary = latInt.toString(2).padStart(24, '0');
+            let lonBinary = lonInt.toString(2).padStart(27, '0');
+
+            let bitString = latSign.toString() + latBinary + lonSign.toString() + lonBinary;
+
+            if (bitString.length !== 53) {
+                console.error("Error: Binary string length invalid");
+                return null;
+            }
+
+            return bitString;
+        }
+
+        // Start the programming sequence
+        function startFlashing() {
+            let binaryString;
+
+            // Generate binary string based on input mode
+            if (document.getElementById('sequence_input_container').classList.contains('hidden')) {
+                // Single coordinate pair
+                binaryString = "0" + latLonTo53BitString(globalLatitude, globalLongitude);
+            } else {
+                // Sequence of coordinates
+                const sequenceInput = document.getElementById('sequence-input').value.trim();
+                const lines = sequenceInput.split('\n');
+
+                if (lines.length > 10) {
+                    alert('Maximum 10 coordinate pairs allowed.');
+                    return;
+                }
+
+                binaryString = '';
+                for (let i = 0; i < lines.length; i++) {
+                    const [lat, lon] = lines[i].split(',').map(val => parseFloat(val.trim()));
+                    if (isNaN(lat) || isNaN(lon)) {
+                        alert(`Invalid coordinates on line ${i + 1}`);
+                        return;
+                    }
+                    binaryString += latLonTo53BitString(lat, lon);
+                }
+
+                const resetPrefix = document.getElementById('reset-compass').checked ? "1" : "0";
+                binaryString = resetPrefix + binaryString;
+            }
+
+            console.log("Programming sequence:", binaryString);
+            flashSequence(binaryString);
+        }
+
+        // Execute the programming sequence
+        function flashSequence(binaryString) {
+            const timing = {
+                shortWhite: 100,
+                longWhite: 300,
+                shortBlack: 100,
+                longBlack: 300
+            };
+
+            if (isFlashing) return;
+            isFlashing = true;
+            noSleep.enable();
+
+            // Hide interface elements
+            document.getElementById('how-to-button').classList.add('hidden');
+            document.getElementById('main-content').classList.add('hidden');
+            document.getElementById('flash-button').classList.add('hidden');
+            document.getElementById('do_sequence').classList.add('hidden');
+            document.getElementById('sequence_input_container').classList.add('hidden');
+            document.getElementById('stop-flashing').classList.remove('hidden');
+
+            let index = 0;
+
+            // Create and start countdown
+            function startCountdown() {
+                const countdownElement = document.createElement('div');
+                countdownElement.id = 'countdown';
+                countdownElement.style.cssText = `
+                    position: fixed;
+                    top: 30%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    font-size: 100px;
+                    font-weight: bold;
+                    color: black;
+                    z-index: 999;
+                `;
+                document.body.appendChild(countdownElement);
+
+                let countdown = 3;
+                countdownElement.textContent = countdown;
+
+                const countdownInterval = setInterval(() => {
+                    if (!isFlashing) {
+                        clearInterval(countdownInterval);
+                        document.body.removeChild(countdownElement);
+                        return;
+                    }
+                    countdown--;
+                    if (countdown === 0) {
+                        clearInterval(countdownInterval);
+                        document.body.removeChild(countdownElement);
+                        startPreSequence();
+                    } else {
+                        countdownElement.textContent = countdown;
+                    }
+                }, 1000);
+            }
+
+            // Initial flashing sequence
+            function startPreSequence() {
+                document.body.style.backgroundColor = 'white';
+                setTimeout(() => {
+                    document.body.style.backgroundColor = 'black';
+                    setTimeout(() => {
+                        document.body.style.backgroundColor = 'white';
+                        setTimeout(() => {
+                            flashNext(false);
+                        }, 700);
+                    }, 100);
+                }, 100);
+            }
+
+            // Main flashing sequence
+            function flashNext(isWhite = false) {
+                if (index < binaryString.length && isFlashing) {
+                    document.body.style.backgroundColor = isWhite ? 'white' : 'black';
+                    const duration = binaryString[index] === '1' 
+                        ? (isWhite ? timing.longWhite : timing.longBlack)
+                        : (isWhite ? timing.shortWhite : timing.shortBlack);
+
+                    flashTimeouts.push(setTimeout(() => {
+                        index++;
+                        flashNext(!isWhite);
+                    }, duration));
+                } else if (isFlashing) {
+                    // Completion sequence
+                    document.body.style.backgroundColor = isWhite ? 'white' : 'black';
+                    setTimeout(() => {
+                        document.body.style.backgroundColor = !isWhite ? 'white' : 'black';
+                        setTimeout(() => {
+                            document.body.style.backgroundColor = 'white';
+                            stopFlashing();
+                        }, 100);
+                    }, 500);
+                }
+            }
+
+            startCountdown();
+        }
+
+        // Stop programming sequence
+        function stopFlashing() {
+            isFlashing = false;
+            flashTimeouts.forEach(timeout => clearTimeout(timeout));
+            flashTimeouts = [];
+
+            // Restore interface elements
+            document.getElementById('main-content').classList.remove('hidden');
+            document.getElementById('flash-button').classList.remove('hidden');
+            document.getElementById('stop-flashing').classList.add('hidden');
+            document.getElementById('how-to-button').classList.remove('hidden');
+            document.getElementById('do_sequence').classList.remove('hidden');
+            
+            if (!document.getElementById('sequence_input_container').classList.contains('hidden')) {
+                document.getElementById('sequence_input_container').classList.remove('hidden');
+            }
+
+            document.body.style.backgroundColor = 'white';
+            noSleep.disable();
+        }
+    </script>
+</body>
+</html>
