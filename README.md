@@ -1,85 +1,73 @@
-# truest-north-compass
-# Compass Programming Interface
+# We Built This Compass to Outlast Us
 
-A web-based tool for programming digital compasses using screen flashing patterns. This interface allows users to set destination coordinates for compatible digital compasses through a simple, browser-based interface.
+The Truest North Compass is designed to be a modern heirloom—something you can pass down to your kids. That means it needs to keep working long after the latest apps have been abandoned and today's wireless protocols have been replaced by something new.
 
-## Features
+So we made a decision: **no apps, no Bluetooth, no accounts, no servers required.**
 
-- **Simple Coordinate Input**: Directly enter latitude and longitude coordinates
-- **Sequence Programming**: Program up to 10 sequential destinations
-- **Visual Programming**: Uses screen flashing patterns to transfer coordinate data
-- **Mobile Optimized**: Designed for use on mobile devices
-- **Screen Wake Lock**: Prevents screen from sleeping during programming
-- **Interactive UI**: Includes countdown timer and visual feedback
-- **Built-in Instructions**: Contains a how-to modal for new users
+Your compass works offline, forever. And if Truest North Compass ever goes away (like so many IoT companies do), you'll still be able to reprogram your compass yourself. That's why we've open-sourced the reprogramming tool right here.
 
-## How It Works
+---
 
-The interface converts geographic coordinates into binary data and transmits this data to compatible compasses using a series of white and black screen flashes. The compass's light sensor reads these flashes and programs the destination coordinates.
+## How to Reprogram Your Compass
 
-### Programming Process
+**Option 1: Use our website (easiest)**
 
-1. Enter the target coordinates (single destination or sequence)
-2. Click "Start Programming"
-3. Place the compass face-down on the screen during the countdown
-4. Wait for the flashing sequence to complete
-5. The compass will confirm successful programming with spinning hands
+Go to [reprogram.truestnorthcompass.com](https://reprogram.truestnorthcompass.com) and follow the instructions. That's it.
 
-## Usage
+**Option 2: Use the file in this repository**
 
-### Single Destination
+If our website ever disappears, you can open [`reprogram.html`](./reprogram.html) directly in any web browser. It works offline—no internet connection needed. Just download it and keep a copy somewhere safe.
 
-1. Enter the latitude and longitude in the input fields
-2. Click "Start Programming"
-3. Follow the on-screen instructions
+---
 
-### Multiple Destinations
+## What is StrobeCode?
 
-1. Click "Program multiple destinations instead"
-2. Enter up to 10 coordinate pairs (one per line) in the format:
-   ```
-   latitude,longitude
-   42.41413,-71.00782
-   33.61546,-81.10347
-   ```
-3. Optionally check "Reset to first destination when compass is turned off"
-4. Click "Start Programming"
-5. Follow the on-screen instructions
+StrobeCode is what we call our screen-flash reprogramming system. Here's how it works:
 
-## Technical Details
+1. You enter coordinates on your phone or tablet
+2. Your screen flashes a pattern of black and white
+3. The compass reads the flashes through its light sensor
+4. Done. New destination programmed.
 
-- Built with vanilla JavaScript and HTML5
-- Uses the NoSleep.js library to prevent screen timeout
-- Converts coordinates to 53-bit binary strings for transmission
-- Supports both single and multi-destination programming
-- Implements precise timing for flash patterns
+**It takes about 10 seconds.** No app to install. No pairing. No account to create. Any screen that can display a webpage can reprogram your compass—your phone today, whatever replaces phones tomorrow.
 
-## Setup
+We designed it this way on purpose. Bluetooth protocols change. Apps get abandoned. But screens and light? Those aren't going anywhere.
 
-1. Download the HTML file
-2. Open it in a modern web browser
-3. That's it! No server or additional setup required
+---
 
-## Compatibility
+## What's in This Repository
 
-- Works with most modern web browsers
-- Designed for mobile devices with brightness control
-- Compatible with digital compasses that use light-based programming
-- Best used with screen brightness at maximum
+| File | What It Is |
+|------|------------|
+| `reprogram.html` | The complete reprogramming tool. Works offline in any browser. |
+| `compass user manual.pdf` | Printed manual that ships with the compass. |
 
-## Best Practices
+---
 
-- Ensure your screen brightness is at maximum
-- Your compass must be upside down to be reprogrammed
-- Clean both your phone screen and compass sensor
-- Keep the compass steady during programming
-- Use in a well-lit environment for best results
-- Double-check coordinates before programming
+## For the Technically Curious
 
-## Contributing
+The reprogramming interface converts GPS coordinates into binary data and transmits it via precise screen flash timing. The compass's light sensor reads these flashes and stores the coordinates in non-volatile memory.
 
-Feel free to submit issues and enhancement requests!
+- Single destination or sequences of up to 10 locations
+- Works on any modern browser (mobile or desktop)
+- No server communication—everything runs locally
+- MIT licensed, so fork it, modify it, do whatever you want
 
-## License
+---
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+## Why We Did This
+
+We've seen too many "smart" products become paperweights when the company behind them shuts down or decides to stop supporting them. We didn't want that for something people are giving as wedding gifts and proposal keepsakes.
+
+If you bought a Truest North Compass, it's yours. Really yours. Not "yours as long as we keep the servers running." We think that's how it should be.
+
+---
+
+## Questions?
+
+- **Compass not responding to flashes?** Make sure your screen brightness is at 100% and the compass is face-down on the screen.
+- **Something else?** Email us at info@truestnorthcompass.com or visit [truestnorthcompass.com/contact](https://truestnorthcompass.com/pages/contact)
+
+---
+
+*Made with care in Buffalo, NY.*
